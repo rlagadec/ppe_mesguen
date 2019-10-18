@@ -1,0 +1,98 @@
+Public Class Form1
+    Dim myConnection As New Odbc.OdbcConnection
+    Dim myCommand As New Odbc.OdbcCommand
+    Dim myReader As Odbc.OdbcDataReader
+    Dim myAdapter As Odbc.OdbcDataAdapter
+    Dim myBuilder As Odbc.OdbcCommandBuilder
+    Dim connString As String
+    Dim donnee As DataTable
+
+
+    Dim frmForm2 As New Form2()
+
+    Structure NomId
+        Property Nom As String
+        Property Id As Integer
+    End Structure
+
+    '...
+    Dim noms(10) As NomId
+        
+
+    Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
+        'FERME DE SERVEUR
+        'connString = "Driver={Microsoft ODBC for Oracle};CONNECTSTRING=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=10.0.23.80)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL)));Uid=MESGUEN3;Pwd=Estran;"
+        'SERVEUR DE TEST
+        'connString = "Driver={Microsoft ODBC for Oracle};CONNECTSTRING=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=10.0.220.100)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORAPROF)));Uid=SCOTT;Pwd=tiger;"
+        'connString = "DSN=Test10;Uid=mesguen;Pwd=passwd;"
+        connString = "DSN=TestOracle;Uid=mesguen;Pwd=passwd;"
+
+        myConnection.ConnectionString = connString
+        Try
+            myConnection.Open()
+            'MessageBox.Show("Connexion Oracle Réussie")
+        Catch ex As Odbc.OdbcException
+            MessageBox.Show(ex.Message)
+        End Try
+
+
+        Dim query As String = "SELECT CHFNOM FROM CHAUFFEUR"
+        myCommand.Connection = myConnection
+        myCommand.CommandText = query
+        myReader = myCommand.ExecuteReader
+        While myReader.Read
+            ComboBox1.Items.Add(myReader.GetString(0))
+        End While
+
+        noms(0).Nom = "Paul"
+        noms(0).Id = 4
+        noms(1).Nom = "Philippe"
+        noms(1).Id = 5
+        noms(2).Nom = "Louis"
+        noms(2).Id = 6
+
+        ComboBox3.DisplayMember = "Nom"
+        ComboBox3.ValueMember = "Id"
+        ComboBox3.DataSource = noms
+
+    End Sub
+
+
+    Private Sub ComboBox1_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles ComboBox1.SelectedIndexChanged
+        Dim table_name As String = ComboBox1.SelectedItem.ToString()
+        Dim query As String = "SELECT * FROM " & table_name
+        donnee = New DataTable
+        myAdapter = New Odbc.OdbcDataAdapter(query, myConnection)
+        myBuilder = New Odbc.OdbcCommandBuilder(myAdapter)
+        myAdapter.Fill(donnee)
+    End Sub
+
+
+    Private Sub ComboBox2_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles ComboBox2.SelectedIndexChanged
+
+    End Sub
+
+
+
+
+    Private Sub Button1_Click(sender As System.Object, e As System.EventArgs) Handles Button1.Click
+        MsgBox(CType(ComboBox3.SelectedItem, NomId).Id)
+
+    End Sub
+
+
+
+    Private Sub Button2_Click(sender As System.Object, e As System.EventArgs) Handles Button2.Click
+        frmForm2.ShowDialog()
+    End Sub
+
+
+
+
+
+
+    Private Sub ComboBox3_SelectedIndexChanged(sender As System.Object, e As System.EventArgs)
+
+    End Sub
+
+End Class
